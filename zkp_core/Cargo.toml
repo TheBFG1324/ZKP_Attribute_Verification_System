@@ -1,0 +1,17 @@
+[package]
+name = "zkp_core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ark-std = "0.3"
+ark-relations = "0.3"
+ark-r1cs-std = "0.3"
+ark-bn254 = "0.3"
+ark-groth16 = "0.3"
+ark-snark = "0.3"
+rand = "0.8"
+
+[profile.release]
+lto = true
+codegen-units = 1
