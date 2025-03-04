@@ -1,1 +1,0 @@
-Result<(ark_groth16::data_structures::ProvingKey<ark_ec::models::bn::Bn<ark_bn254::curves::Config>>, ark_groth16::data_structures::VerifyingKey<ark_ec::models::bn::Bn<ark_bn254::curves::Config>>), ark_relations::r1cs::error::SynthesisError>
