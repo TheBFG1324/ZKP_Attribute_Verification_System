@@ -8,13 +8,17 @@
 
  This system is capable of verifying the following attributes:
 
- - Digital Identity Token: Prove ownership of a digital identity token without revealing the actual token details.
- - Employment Status: Demonstrate current employment or membership in an organization through a verifiable credential.
  - College Degree Credential: Validate the possession of a college degree, ensuring authenticity without exposing detailed academic records.
  - Citizenship: Confirm citizenship status using cryptographically secured government-issued data.
  - Age Verification: Prove that the user meets a minimum age requirement (e.g., over 18) without disclosing the exact birthdate.
 
  Each attribute is implemented as its own zk-SNARK circuit within the system, ensuring that sensitive inputs remain confidential while enabling public verification.
+
+| Circuit                        | Technique Used                  | What is Public?        | What is Private?              |
+|--------------------------------|--------------------------------|------------------------|--------------------------------|
+| Citizenship Verification       | Merkle Tree Inclusion Proof   | Merkle Root           | User’s Hash & Merkle Path      |
+| College Credential Verification | Digital Signature Check       | University Public Key | User’s Credential & Signature |
+| Age Verification               | Numeric Comparison            | Minimum Age           | User’s Age                     |
 
  ## Sample User Workflow
 
@@ -53,48 +57,27 @@
 ZKP_Identity_Verification_System/
 ├── contract/                        # On-chain verification smart contracts
 │   ├── src/                         # Solidity contracts for each verifiable attribute
-│   │   ├── DigitalIdentityToken.sol
-│   │   ├── EmploymentStatus.sol
 │   │   ├── CollegeDegreeCredential.sol
 │   │   ├── Citizenship.sol
-│   │   ├── AgeVerification.sol
-│   │   └── CommonVerifier.sol       # Shared verification logic
+│   │   └── AgeVerification.sol
 │   └── hardhat.config.js            # Smart contract configuration
 │
 ├── zkp_core/                        # Rust-based zk-SNARK system
 │   ├── circuits/                    # zk-SNARK circuits for each attribute
-│   │   ├── digital_identity_token/
-│   │   │   ├── circuit.r1cs         # R1CS representation of the circuit
-│   │   │   ├── witness_calculator.rs# Rust tool to compute witnesses
-│   │   │   └── README.md            # Design notes for the circuit
-│   │   ├── employment_status/
-│   │   │   ├── circuit.r1cs
-│   │   │   ├── witness_calculator.rs
-│   │   │   └── README.md
 │   │   ├── college_degree_credential/
-│   │   │   ├── circuit.r1cs
-│   │   │   ├── witness_calculator.rs
-│   │   │   └── README.md
+│   │   │   └── witness_calculator.rs
 │   │   ├── citizenship/
-│   │   │   ├── circuit.r1cs
-│   │   │   ├── witness_calculator.rs
-│   │   │   └── README.md
+│   │   │   └── witness_calculator.rs
 │   │   └── age_verification/
-│   │       ├── circuit.r1cs
-│   │       ├── witness_calculator.rs
-│   │       └── README.md
+│   │       └── witness_calculator.rs
 │   ├── src/                         # Core Rust code for proof generation and verification
 │   │   ├── proof_system.rs          # Implements proof generation logic
-│   │   ├── verifier.rs              # Implements local verification logic
 │   │   └── lib.rs                   # Shared library code for the ZKP system
-│   ├── Cargo.toml                   # Rust project configuration
-│   └── README.md                    # Documentation for the zk-SNARK core
+│   └──  Cargo.toml                   # Rust project configuration
 │
 ├── backend/                         # API layer for interacting with the ZKP system
 │   ├── src/
 │   │   ├── routes/                  # API endpoints for each verification attribute
-│   │   │   ├── digital_identity_token.rs
-│   │   │   ├── employment_status.rs
 │   │   │   ├── college_degree.rs
 │   │   │   ├── citizenship.rs
 │   │   │   └── age_verification.rs
