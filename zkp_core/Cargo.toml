@@ -7,11 +7,11 @@ edition = "2024"
 ark-std = "0.4"
 ark-ff = "0.4"
 ark-ec = "0.4"
-ark-bn254 = "0.4"  # Added to fix the issue
+ark-bn254 = "0.4"
 ark-groth16 = "0.4"
 ark-relations = "0.4"
 ark-r1cs-std = "0.4"
-rand = "0.8"  # Added for `thread_rng`
+rand = "0.8"
 
 [profile.release]
 lto = true

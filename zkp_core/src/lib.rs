@@ -4,4 +4,7 @@ pub mod circuits {
     pub mod age_verification {
         pub mod witness_calculator;
     }
+    pub mod citizenship_verification {
+        pub mod witness_calculator;
+    }
 }
