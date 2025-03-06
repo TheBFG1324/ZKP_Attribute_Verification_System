@@ -7,4 +7,7 @@ pub mod circuits {
     pub mod citizenship_verification {
         pub mod witness_calculator;
     }
+    pub mod college_credential_verification {
+        pub mod witness_calculator;
+    }
 }

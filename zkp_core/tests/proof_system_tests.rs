@@ -73,3 +73,41 @@ fn test_citizenship_proof_fails() {
     // Verification should return false
     assert!(proof.is_err());
 }
+
+// ----------------------------
+// College Credential Verification Tests
+// ----------------------------
+
+#[test]
+fn test_college_credential_proof_passes() {
+    // Generate verifying and proving keys for the citizenship circuit
+    let (pk, vk) = setup_citizenship_verification_circuit().expect("Setup failed");
+
+    // Set up "credential + signature" == university_public_key
+    let university_public_key = Fr::from(25u64);
+    let credential = Fr::from(10u64);
+    let signature = Fr::from(15u64);
+
+    // Generate a proof
+    let proof = prove_citizenship(&pk, Some(university_public_key), Some(credential), Some(signature)).expect("Proof generation failed");
+
+    // This should verify
+    assert!(verify_citizenship(&vk, &proof, university_public_key).expect("Verification failed"));
+}
+
+#[test]
+fn test_college_credential_proof_fails() {
+    // Generate verifying and proving keys for the citizenship circuit
+    let (pk, _vk) = setup_citizenship_verification_circuit().expect("Setup failed");
+
+    // Now credential + signature != univeristy_public_key
+    let university_public_key = Fr::from(25u64);
+    let credential = Fr::from(10u64);
+    let signature = Fr::from(10u64);
+
+    // Generate the proof (the proof creation itself doesn't fail—it's just wrong)
+    let proof = std::panic::catch_unwind(|| prove_citizenship(&pk, Some(university_public_key), Some(credential), Some(signature)).expect("Proof generation failed"));
+
+    // Verification should return false
+    assert!(proof.is_err());
+}

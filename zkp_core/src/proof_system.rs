@@ -9,6 +9,9 @@ use crate::circuits::age_verification::witness_calculator::{
 use crate::circuits::citizenship_verification::witness_calculator::{
     CitizenshipVerificationCircuit, calculate_citizenship_verification_witness,
 };
+use crate::circuits::college_credential_verification::witness_calculator::{
+    CollegeCredentialVerificationCircuit, calculate_college_credential_verification_witness,
+};
 
 /// Performs a one-time trusted setup for the age verification circuit
 pub fn setup_age_verification_circuit() -> Result<(ProvingKey<Bn254>, VerifyingKey<Bn254>), SynthesisError> {
@@ -109,3 +112,49 @@ pub fn verify_citizenship(
     Ok(Groth16::<Bn254>::verify_proof(&pvk, proof, &[merkle_root]))?
 }
 
+/// Performs a one-time trusted setup for the college credential verification circuit
+pub fn setup_credential_verification_circuit() -> Result<(ProvingKey<Bn254>, VerifyingKey<Bn254>), SynthesisError> {
+    // Create a dummy circuit instance with arbitrary valid values
+    let dummy_circuit = CollegeCredentialVerificationCircuit {
+        university_public_key: Some(Fr::from(20u64)),
+        credential: Some(Fr::from(18u64)),
+        signature: Some(Fr::from(2u64)),
+    };
+
+    let mut rng = thread_rng();
+    
+    // Generate parameters once to get the proving and verifying keys
+    let params = Groth16::<Bn254>::generate_random_parameters_with_reduction(dummy_circuit, &mut rng)?;
+    Ok((params.clone(), params.vk))
+}
+
+// ZKP proof generator for college credential status
+pub fn prove_college_credential(
+    proving_key: &ProvingKey<Bn254>,
+    university_public_key: Option<Fr>,
+    credential: Option<Fr>,
+    signature: Option<Fr>,
+) -> Result<Proof<Bn254>, SynthesisError> {
+    // Create the circuit with public and private inputs
+    let circuit = calculate_college_credential_verification_witness(university_public_key, credential, signature);
+    
+    // Get random variable
+    let mut rng = thread_rng();
+    
+    // Generate the proof
+    let proof = Groth16::<Bn254>::create_random_proof_with_reduction(circuit, proving_key, &mut rng)?;
+    Ok(proof)
+}
+
+// Verify a given proof of a user's college credential status
+pub fn verify_college_credential(
+    vk: &VerifyingKey<Bn254>,
+    proof: &Proof<Bn254>,
+    university_public_key: Fr, 
+) -> Result<bool, SynthesisError> {
+    // Prepare the verifying key
+    let pvk = prepare_verifying_key(vk);
+
+    // Check the given proof with public parameters
+    Ok(Groth16::<Bn254>::verify_proof(&pvk, proof, &[university_public_key]))?
+}
