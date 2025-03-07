@@ -4,6 +4,8 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GeneratedProof {
     pub proof: String,
+    pub proving_key: Option<String>,
+    pub verifying_key: Option<String>,
 }
 
 // Represents the status of a proof verification
