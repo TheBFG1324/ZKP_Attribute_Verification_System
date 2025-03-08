@@ -43,14 +43,14 @@
  ## Tech Stack
 
  - Rust:
- - Implements the zk-SNARK circuits in zkp_core/ for proof generation and local verification.
- - Powers the backend API (backend/) for handling requests and orchestrating the verification flow.
+   Implements the zk-SNARK circuits in zkp_core/ for proof generation and local verification.
+   Powers the backend API (backend/) for handling requests and orchestrating the verification flow.
  - Solidity:
- - Develops the smart contract layer (contract/) for optional on-chain verification.
+   Develops the smart contract layer (contract/) for optional on-chain verification.
  - zk-SNARKs:
- - The underlying cryptographic proof system that enables zero-knowledge proofs for privacy-preserving attribute verification.
+   The underlying cryptographic proof system that enables zero-knowledge proofs for privacy-preserving attribute verification.
  - Hardhat:
- - Used for smart contract development and deployment configuration (note: only configuration is included, without migrations or tests).
+   Used for smart contract development and deployment configuration (note: only configuration is included, without migrations or tests).
 
  ## Repository Structure
  ```plaintext
@@ -77,24 +77,20 @@ ZKP_Identity_Verification_System/
 │
 ├── backend/                         # API layer for interacting with the ZKP system
 │   ├── src/
+│   │   ├── tests/                  # API endpoint tests for ZK-SNARK proof generation and verification
 │   │   ├── routes/                  # API endpoints for each verification attribute
 │   │   │   ├── college_degree.rs
 │   │   │   ├── citizenship.rs
 │   │   │   └── age_verification.rs
-│   │   ├── models/                  # Data models (e.g., proof structures, user data)
-│   │   │   ├── proof.rs
-│   │   │   └── user.rs
+│   │   ├── models/                  # Data models (e.g., proof structures, user data, and responses)
+│   │   │   ├── proof_generation.rs
+│   │   │   ├── proof_generation.rs
+│   │   │   └── response.rs
 │   │   ├── controllers/             # Business logic for handling API requests
-│   │   │   ├── proof_controller.rs
-│   │   │   └── user_controller.rs
+│   │   │   ├── proof_generator_controller.rs
+│   │   │   └── proof_verifier_controller.rs
 │   │   ├── main.rs                  # API entry point
-│   │   └── lib.rs                   # Shared utilities and middleware for the API
-│   ├── Cargo.toml                   # Rust project configuration for the backend
-│   ├── README.md                    # Backend specific documentation
-│   └── .env.example                 # Environment variable template
-│
-├── testing/                         # Generic testing folder
-│   └── README.md                    # Future testing instructions and notes
+│   └── Cargo.toml                   # Rust project configuration for the backend
 │
 ├── docs/                            # Project documentation
 │   ├── architecture.md              # High-level architecture overview and diagrams
