@@ -8,7 +8,7 @@ mod models;
 // ZKP Generator and Verifier Server
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Starting backend server on 127.0.0.1:8080");
+    println!("Starting backend server on localhost:8080");
 
     HttpServer::new(|| {
         App::new()
@@ -16,7 +16,7 @@ async fn main() -> std::io::Result<()> {
             .configure(routes::citizenship::init_routes)
             .configure(routes::college_degree::init_routes)
     })
-    .bind("127.0.0.1:8080")?
+    .bind("localhost:8080")?
     .run()
     .await
 }
