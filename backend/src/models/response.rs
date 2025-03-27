@@ -13,3 +13,10 @@ pub struct GeneratedProof {
 pub struct ProofStatus {
     pub proof_status: bool,
 }
+
+// Represents the proving and verifying keys generated during setup
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Keys {
+    pub proving_key: String,
+    pub verifying_key: String,
+}

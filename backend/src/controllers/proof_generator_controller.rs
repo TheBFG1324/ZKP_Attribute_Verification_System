@@ -1,8 +1,7 @@
 use actix_web::{web, HttpResponse, Responder};
 use ark_bn254::Fr;
 use zkp_core::proof_system;
-use crate::utils::utils::{serialize_proof, serialize_proving_key, serialize_verifying_key};
-
+use crate::utils::utils::{serialize_proof, deserialize_proving_key};
 use crate::models::response::GeneratedProof;
 use crate::models::proof_generation::{
     AgeProofGenerationRequest,
@@ -10,51 +9,42 @@ use crate::models::proof_generation::{
     CollegeCredentialProofGenerationRequest,
 };
 
-/// Generates the ZK-SNARK age threshold proof and returns a `GeneratedProof` in JSON
+/// Generates the ZK-SNARK age threshold proof using the provided keys.
 pub async fn generate_age_proof(req: web::Json<AgeProofGenerationRequest>) -> impl Responder {
-    // Setup circuit for age verification
-    let (pk, vk) = match proof_system::setup_age_verification_circuit() {
-        Ok(keys) => keys,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Age circuit setup error: {:?}", e)),
+    // Deserialize the provided proving key.
+    let pk = match deserialize_proving_key(&req.proving_key) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Proving key deserialization error: {:?}", e)),
     };
 
-    // Generate the proof
+    // Generate the proof using the provided keys.
     let proof = match proof_system::prove_age(&pk, req.user_age, req.min_age) {
         Ok(proof) => proof,
         Err(e) => return HttpResponse::InternalServerError().body(format!("Age proof generation error: {:?}", e)),
     };
 
-    // Serialize the proof and keys into Base64 strings
+    // Serialize the proof.
     let proof_str = match serialize_proof(&proof) {
         Ok(s) => s,
         Err(e) => return HttpResponse::InternalServerError().body(format!("Proof serialization error: {:?}", e)),
     };
 
-    let proving_key_str = match serialize_proving_key(&pk) {
-        Ok(s) => s,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Proving key serialization error: {:?}", e)),
-    };
-
-    let verifying_key_str = match serialize_verifying_key(&vk) {
-        Ok(s) => s,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Verifying key serialization error: {:?}", e)),
-    };
-
     let response = GeneratedProof {
         proof: proof_str,
-        proving_key: Some(proving_key_str),
-        verifying_key: Some(verifying_key_str),
+        // Echo back the provided keys.
+        proving_key: Some(req.proving_key.clone()),
+        verifying_key: Some(req.verifying_key.clone()),
     };
 
     HttpResponse::Ok().json(response)
 }
 
-/// Generates the ZK-SNARK citizenship status proof and returns a `GeneratedProof` in JSON
+/// Generates the ZK-SNARK citizenship status proof using the provided keys.
 pub async fn generate_citizenship_proof(req: web::Json<CitizenshipProofGenerationRequest>) -> impl Responder {
-    // Setup circuit for citizenship verification.
-    let (pk, vk) = match proof_system::setup_citizenship_verification_circuit() {
-        Ok(keys) => keys,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Citizenship circuit setup error: {:?}", e)),
+    // Deserialize the provided proving key.
+    let pk = match deserialize_proving_key(&req.proving_key) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Proving key deserialization error: {:?}", e)),
     };
 
     // Convert inputs to field elements.
@@ -68,37 +58,27 @@ pub async fn generate_citizenship_proof(req: web::Json<CitizenshipProofGeneratio
         Err(e) => return HttpResponse::InternalServerError().body(format!("Citizenship proof generation error: {:?}", e)),
     };
 
-    // Serialize the proof and keys.
+    // Serialize the proof.
     let proof_str = match serialize_proof(&proof) {
         Ok(s) => s,
         Err(e) => return HttpResponse::InternalServerError().body(format!("Proof serialization error: {:?}", e)),
     };
 
-    let proving_key_str = match serialize_proving_key(&pk) {
-        Ok(s) => s,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Proving key serialization error: {:?}", e)),
-    };
-
-    let verifying_key_str = match serialize_verifying_key(&vk) {
-        Ok(s) => s,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Verifying key serialization error: {:?}", e)),
-    };
-
     let response = GeneratedProof {
         proof: proof_str,
-        proving_key: Some(proving_key_str),
-        verifying_key: Some(verifying_key_str),
+        proving_key: Some(req.proving_key.clone()),
+        verifying_key: Some(req.verifying_key.clone()),
     };
 
     HttpResponse::Ok().json(response)
 }
 
-/// Generates the ZK-SNARK college credential status proof and returns a `GeneratedProof` in JSON.
+/// Generates the ZK-SNARK college credential status proof using the provided keys.
 pub async fn generate_college_credential_proof(req: web::Json<CollegeCredentialProofGenerationRequest>) -> impl Responder {
-    // Setup circuit for college credential verification.
-    let (pk, vk) = match proof_system::setup_credential_verification_circuit() {
-        Ok(keys) => keys,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("College credential circuit setup error: {:?}", e)),
+    // Deserialize the provided proving key.
+    let pk = match deserialize_proving_key(&req.proving_key) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Proving key deserialization error: {:?}", e)),
     };
 
     // Convert inputs to field elements.
@@ -112,26 +92,16 @@ pub async fn generate_college_credential_proof(req: web::Json<CollegeCredentialP
         Err(e) => return HttpResponse::InternalServerError().body(format!("College credential proof generation error: {:?}", e)),
     };
 
-    // Serialize the proof and keys.
+    // Serialize the proof.
     let proof_str = match serialize_proof(&proof) {
         Ok(s) => s,
         Err(e) => return HttpResponse::InternalServerError().body(format!("Proof serialization error: {:?}", e)),
     };
 
-    let proving_key_str = match serialize_proving_key(&pk) {
-        Ok(s) => s,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Proving key serialization error: {:?}", e)),
-    };
-
-    let verifying_key_str = match serialize_verifying_key(&vk) {
-        Ok(s) => s,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Verifying key serialization error: {:?}", e)),
-    };
-
     let response = GeneratedProof {
         proof: proof_str,
-        proving_key: Some(proving_key_str),
-        verifying_key: Some(verifying_key_str),
+        proving_key: Some(req.proving_key.clone()),
+        verifying_key: Some(req.verifying_key.clone()),
     };
 
     HttpResponse::Ok().json(response)

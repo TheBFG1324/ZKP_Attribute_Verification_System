@@ -15,6 +15,7 @@ async fn main() -> std::io::Result<()> {
             .configure(routes::age_verification::init_routes)
             .configure(routes::citizenship::init_routes)
             .configure(routes::college_degree::init_routes)
+            .configure(routes::keys::init_routes)
     })
     .bind("localhost:8080")?
     .run()

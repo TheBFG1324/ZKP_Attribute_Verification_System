@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse, Responder};
 use ark_bn254::Fr;
 use zkp_core::proof_system;
-use crate::utils::utils::deserialize_proof;
+use crate::utils::utils::{deserialize_proof, deserialize_verifying_key};
 use crate::models::proof_verification::{
     AgeProofVerify,
     CitizenshipProofVerify,
@@ -9,12 +9,11 @@ use crate::models::proof_verification::{
 };
 use crate::models::response::ProofStatus;
 
-// Verifies an age verification proof. Expects a JSON payload matching `AgeProofVerify` and returns a `ProofStatus` in JSON
+// Verifies an age verification proof using the provided verifying key.
 pub async fn verify_age_proof(req: web::Json<AgeProofVerify>) -> impl Responder {
-    // Setup the circuit (we only need the verifying key)
-    let (_, vk) = match proof_system::setup_age_verification_circuit() {
-        Ok((_pk, vk)) => (_pk, vk),
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Age circuit setup error: {:?}", e)),
+    let vk = match deserialize_verifying_key(&req.verifying_key) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Verifying key deserialization error: {:?}", e)),
     };
 
     // Deserialize the proof from the Base64 string
@@ -33,12 +32,11 @@ pub async fn verify_age_proof(req: web::Json<AgeProofVerify>) -> impl Responder 
     HttpResponse::Ok().json(response)
 }
 
-// Verifies a citizenship verification proof. Expects a JSON payload matching `CitizenshipProofVerify` and returns a `ProofStatus` in JSON.
+// Verifies a citizenship verification proof using the provided verifying key.
 pub async fn verify_citizenship_proof(req: web::Json<CitizenshipProofVerify>) -> impl Responder {
-    // Setup the circuit to obtain the verifying key
-    let (_, vk) = match proof_system::setup_citizenship_verification_circuit() {
-        Ok((_pk, vk)) => (_pk, vk),
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Citizenship circuit setup error: {:?}", e)),
+    let vk = match deserialize_verifying_key(&req.verifying_key) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Verifying key deserialization error: {:?}", e)),
     };
 
     // Convert the public input (merkle_root) into a field element.
@@ -53,20 +51,18 @@ pub async fn verify_citizenship_proof(req: web::Json<CitizenshipProofVerify>) ->
     // Verify the citizenship proof using the merkle_root as public input.
     let verified = match proof_system::verify_citizenship(&vk, &proof, merkle_root) {
         Ok(result) => result,
-        Err(e) => return HttpResponse::InternalServerError()
-            .body(format!("Citizenship proof verification error: {:?}", e)),
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Citizenship proof verification error: {:?}", e)),
     };
 
     let response = ProofStatus { proof_status: verified };
     HttpResponse::Ok().json(response)
 }
 
-// Verifies a college credential verification proof. Expects a JSON payload matching `CollegeCredentialProofVerify` and returns a `ProofStatus` in JSON
+/// Verifies a college credential verification proof using the provided verifying key.
 pub async fn verify_college_credential_proof(req: web::Json<CollegeCredentialProofVerify>) -> impl Responder {
-    // Setup the circuit to obtain the verifying key
-    let (_, vk) = match proof_system::setup_credential_verification_circuit() {
-        Ok((_pk, vk)) => (_pk, vk),
-        Err(e) => return HttpResponse::InternalServerError().body(format!("College credential circuit setup error: {:?}", e)),
+    let vk = match deserialize_verifying_key(&req.verifying_key) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Verifying key deserialization error: {:?}", e)),
     };
 
     // Convert the public input (university_public_key) to a field element
